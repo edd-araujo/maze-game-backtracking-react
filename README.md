@@ -1,13 +1,72 @@
-# React + Vite
+# Jogo de Labirinto com algoritmo Backtracking
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+#### Informações do Projeto
 
-Currently, two official plugins are available:
+- Curso: Ciência da Computação
+- Semestre: 5º semestre (2025.1)
+- Integrante: [Edioelson Júnior A. B. Teixeira](https://github.com/edd-araujo)
+- Disciplina: Algoritmos e Estruturas de Dados
+- Orientador: Wellington Lacerda
+- Universidade: UNIFACS
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Este projeto foi desenvolvido como parte de um trabalho acadêmico da disciplina de **Algoritmos e Estruturas de Dados**, no curso de Ciência da Computação da Universidade Salvador (**UNIFACS**). O objetivo é implementar um jogo de **labirinto** utilizando o **algoritmo de backtracking**.
 
-## Expanding the ESLint configuration
+#### Sumário
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-# maze-game-backtracking-react
+- [Descrição](#descrição)
+- [Tecnologias](#tecnologias)
+- [Funcionalidades](#funcionalidades)
+- [Demonstração](#demonstração)
+- [Como executar](#como-executar-localmente)
+
+## Descrição
+
+Projeto web interativo em React que demonstra a solução de labirintos utilizando o algoritmo de backtracking. O usuário pode visualizar cada passo da busca em tempo real e ajuste a velocidade da simulação.
+
+## Tecnologias
+
+- [React.js](): Biblioteca principal para construção da interface.
+- [Vite](): Ferramenta de build rápida e moderna.
+- [Tailwind CSS](): Para estilização rápida e responsiva.
+- [JavaScript](): Lógica do jogo, algoritmo e controle.
+
+## Funcionalidades
+
+- **Jogador virtual** que percorre o labirinto automaticamente usando backtracking.
+- Visualização passo a passo da **movimentação** do jogador virtual.
+- Controle de **velocidade** com slider (delay entre os passos).
+- **Log dos movimentos** do jogador.
+- Seleção **aleatória de mapas** pré-definidos.
+- **Reset** da simulação.
+
+## Demonstração
+
+> ...
+
+## Como executar localmente
+
+1. Clone o repositório.
+
+```bash
+git clone https://github.com/seu-usuario/maze-solver-react
+```
+
+2. Acesse a pasta
+
+```bash
+cd maze-solver-react
+```
+
+3. Instale as dependências
+
+```bash
+npm install
+```
+
+4. Rode o projeto
+
+```bash
+npm run dev
+```
+
+[Voltar ao topo](#informações-do-projeto)
