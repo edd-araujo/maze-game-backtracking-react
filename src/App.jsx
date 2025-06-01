@@ -5,13 +5,15 @@ import GamePage from "./pages/GamePage";
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/credits" element={<CreditsPage />} />
-        <Route path="/game" element={<GamePage />} />
-      </Routes>
-    </BrowserRouter>
+    <div className="bg-[#003645] h-screen">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/credits" element={<CreditsPage />} />
+          <Route path="/game" element={<GamePage />} />
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 };
 
