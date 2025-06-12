@@ -5,7 +5,7 @@ import GamePage from "./pages/GamePage";
 
 const App = () => {
   return (
-    <div className="bg-[#003645] h-screen">
+    <div className="bg-[#003645] h-screen overflow-hidden">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
