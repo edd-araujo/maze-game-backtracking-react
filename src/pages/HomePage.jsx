@@ -23,8 +23,8 @@ const HomePage = () => {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center lg:gap-12 min-h-screen p-4 sm:p-8 border border-red-500">
-      <h1 className="lg:w-1/3 mb-8 border border-green-500">
+    <div className="relative flex flex-col items-center justify-center lg:gap-12 min-h-screen p-4 sm:p-8">
+      <h1 className="lg:w-1/3 mb-8">
         <img
           src="/src/assets/GameLogo-mobile.png"
           alt="Logo do Jogo"
@@ -37,9 +37,9 @@ const HomePage = () => {
         />
       </h1>
 
-      <div className="flex flex-col gap-4 w-full max-w-xs lg:max-w-lg border border-blue-500">
+      <div className="flex flex-col gap-4 w-full max-w-xs lg:max-w-lg">
         <Button type={"start"} onClick={() => startGame()} />
-        <div className="relative w-full border-pink-400">
+        <div className="relative w-full ">
           <Button
             type={"dropdown"}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
