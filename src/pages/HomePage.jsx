@@ -23,14 +23,23 @@ const HomePage = () => {
   };
 
   return (
-    <div className=" relative border border-red-500 flex flex-col items-center justify-center h-full p-4">
-      <h1 className="w-72 font-bold text-white text-5xl mb-8">
-        Backtracking Explorer
+    <div className="relative flex flex-col items-center justify-center lg:gap-12 min-h-screen p-4 sm:p-8 border border-red-500">
+      <h1 className="lg:w-1/3 mb-8 border border-green-500">
+        <img
+          src="/src/assets/GameLogo-mobile.png"
+          alt="Logo do Jogo"
+          className="block md:hidden w-full"
+        />
+        <img
+          src="/src/assets/GameLogo-desktop.png"
+          alt="Logo do Jogo"
+          className="hidden md:block w-full"
+        />
       </h1>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 w-full max-w-xs lg:max-w-lg border border-blue-500">
         <Button type={"start"} onClick={() => startGame()} />
-        <div className="relative">
+        <div className="relative w-full border-pink-400">
           <Button
             type={"dropdown"}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -48,15 +57,17 @@ const HomePage = () => {
         </div>
       </div>
 
-      <p className="absolute bottom-4 inline-block text-[#E8E8E8] ">
-        Desenvolvido por{" "}
-        <a
-          href="https://github.com/edd-araujo"
-          className="text-[#C88000] underline decoration-2"
-        >
-          Ed Araujo
-        </a>
-      </p>
+      <div className="w-full flex justify-center absolute bottom-4 left-0">
+        <p className="inline-block text-[#E8E8E8]">
+          Desenvolvido por{" "}
+          <a
+            href="https://github.com/edd-araujo"
+            className="text-[#C88000] underline decoration-2"
+          >
+            Ed Araujo
+          </a>
+        </p>
+      </div>
 
       <Button type={"song"} onClick={() => toggleMute()} isMute={isMuted} />
     </div>

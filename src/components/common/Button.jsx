@@ -27,10 +27,10 @@ const Button = ({
 
   if (type === "start") {
     buttonText = "Iniciar";
-    buttonStyles = "bg-[#C88000] text-3xl rounded-lg";
+    buttonStyles = "bg-[#C88000] w-full text-3xl rounded-lg";
   } else if (type === "dropdown") {
     buttonText = "Selecionar Mapa";
-    buttonStyles = `relative bg-[#004356] text-2xl rounded-t-lg ${
+    buttonStyles = `relative bg-[#004356] w-full text-2xl rounded-t-lg ${
       dropdownOpen ? "rounded-b-none" : "rounded-b-lg"
     }`;
   } else if (type === "song") {
