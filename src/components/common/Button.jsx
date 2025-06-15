@@ -26,7 +26,7 @@ const Button = ({
 
   const renderSongIcon = () =>
     isMute ? (
-      <FaVolumeMute className="w-6 h-6 md:w-8 md:h-8 lg:w-6 lg:h-10" />
+      <FaVolumeMute className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
     ) : (
       <FaVolumeUp className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
     );
