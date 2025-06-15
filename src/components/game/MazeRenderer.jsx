@@ -8,7 +8,7 @@ const MazeRenderer = () => {
 
   const getCellStyle = (row, col, cellValue) => {
     const baseStyle =
-      "w-8 h-8 border border-gray-600 items-center justify-center text-xs font-bold";
+      "w-8 h-8 lg:w-12 lg:h-12 border border-gray-600 items-center justify-center text-xs font-bold";
     const currentPos = `${row}-${col}`;
     const isCurrentPosition =
       state.playerPosition.row === row && state.playerPosition.col === col;
@@ -67,27 +67,15 @@ const MazeRenderer = () => {
   };
 
   return (
-    <div className="flex flex-col items-center p-4">
+    <div className="flex flex-col items-center">
       <div className="mb-4">
         <h2 className="text-white text-2xl font-bold text-center">
-          Labirinto - {state.selectedMap.replace("gameMap", "Mapa ")}
+          {state.selectedMap.replace("gameMap", "Mapa ")}
         </h2>
-        <p className="text-gray-300 text-center">
-          Status:{" "}
-          {state.gameStatus === "idle"
-            ? "Aguardando"
-            : state.gameStatus === "running"
-            ? "Executando"
-            : state.gameStatus === "paused"
-            ? "Pausado"
-            : state.gameStatus === "completed"
-            ? "Concluído"
-            : "Sem solução"}
-        </p>
       </div>
 
       <div
-        className="grid gap-1 p-4 bg-gray-900 rounded-lg shadow-lg"
+        className="grid"
         style={{
           gridTemplateColumns: `repeat(${state.currentMap[0].length}, minmax(0, 1fr))`,
         }}
@@ -102,35 +90,6 @@ const MazeRenderer = () => {
             </div>
           ))
         )}
-      </div>
-
-      <div className="mt-4 text-center">
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-300">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-500"></div>
-            <span>Início</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-500"></div>
-            <span>Saída</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-500"></div>
-            <span>Posição Atual</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-300"></div>
-            <span>Visitado</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-yellow-400"></div>
-            <span>Solução</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-purple-300"></div>
-            <span>Caminho Percorrido</span>
-          </div>
-        </div>
       </div>
     </div>
   );
