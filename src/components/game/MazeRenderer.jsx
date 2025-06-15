@@ -67,13 +67,7 @@ const MazeRenderer = () => {
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="mb-4">
-        <h2 className="text-white text-2xl font-bold text-center">
-          {state.selectedMap.replace("gameMap", "Mapa ")}
-        </h2>
-      </div>
-
+    <div className="flex flex-col items-center pt-4">
       <div
         className="grid"
         style={{
