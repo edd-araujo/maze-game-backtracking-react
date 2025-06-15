@@ -1,84 +1,107 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useGame } from "../context/GameContext";
+import MazeRenderer from "../components/game/MazeRenderer";
+import ControlPanel from "../components/game/ControlPanel";
 import Button from "../components/common/Button";
-import { useNavigate } from "react-router-dom";
-
-const speedOptions = [1, 1.5, 2];
+import maps from "../data/maps";
 
 const GamePage = () => {
+  const location = useLocation();
   const navigate = useNavigate();
+  const { state, dispatch } = useGame();
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [speedIndex, setSpeedIndex] = useState(0);
-  const [showSolution, setShowSolution] = useState(false);
-  const [showFullPath, setFullPath] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  useEffect(() => {
+    const mapId = location.state?.mapId || "gameMap1";
+    const selectedMap = maps[mapId];
 
-  const handlePlayPause = () => setIsPlaying((prev) => !prev);
-  const handleShowSolution = () => setShowSolution((prev) => !prev);
-  const handleFullPath = () => setFullPath((prev) => !prev);
-  const handleSpeed = () =>
-    setSpeedIndex((prev) => (prev + 1) % speedOptions.length);
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
+    if (!selectedMap) {
+      console.error("Map not found:", mapId);
+      navigate("/");
+      return;
+    }
+
+    let startPos = null;
+    let endPos = null;
+
+    for (let row = 0; row < selectedMap.length; row++) {
+      for (let col = 0; col < selectedMap[row].length; col++) {
+        if (selectedMap[row][col] === "S") {
+          startPos = { row, col };
+        } else if (selectedMap[row][col] === "E") {
+          endPos = { row, col };
+        }
+      }
+    }
+
+    if (!startPos || !endPos) {
+      console.error("Start or end position not found in map");
+      navigate("/");
+      return;
+    }
+
+    // Initialize game state
+    dispatch({ type: "SET_SELECTED_MAP", payload: mapId });
+    dispatch({
+      type: "INITIALIZE_GAME",
+      payload: {
+        map: selectedMap,
+        start: startPos,
+        end: endPos,
+      },
+    });
+  }, [location.state, dispatch, navigate]);
+
+  const handleBackToHome = () => {
+    navigate("/");
   };
 
+  if (!state.currentMap) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-white text-xl">Carregando labirinto...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative flex flex-col md:items-center justify-center h-screen w-screen">
-      <button onClick={() => navigate("/")}>
-        <img
-          src="/src/assets/GameIcon-mobile.svg"
-          alt="Ícone do Jogo"
-          className="absolute top-4 left-4 md:left-6 md:top-6"
-        />
-      </button>
-      <Button type={"song"} onClick={toggleMute} isMute={isMuted} />
-
-      <div className="mx-4 md:w-fit md:flex md:flex-col md:items-center">
-        <div className="flex items-center md:max-w-[800px] lg:max-w-2xl xl:max-w-4xl justify-center w-full bg-gray-800 aspect-square mb-4 rounded-lg">
-          <span className="text-gray-100">[Maze Map]</span>
-        </div>
-
-        <div className="md:w-fit md:max-w-[400px]">
-          <div className="flex justify-center items-center gap-2 mb-2">
-            <Button
-              type={"play/pause"}
-              onClick={handlePlayPause}
-              isPlaying={isPlaying}
-            />
-            <Button type={"reset"} />
-            <Button
-              type={"speed"}
-              onClick={handleSpeed}
-              speedOption={speedOptions[speedIndex]}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Button
-              type={"solutionPath"}
-              onClick={handleShowSolution}
-              showSolution={showSolution}
-            />
-            <Button
-              type={"fullPath"}
-              onClick={handleFullPath}
-              showFullPath={showFullPath}
-            />
-          </div>
-        </div>
+    <div className="flex flex-col min-h-screen">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4">
+        <button onClick={handleBackToHome}>
+          <img
+            src="/src/assets/GameIcon-desktop.png"
+            alt="Ícone do Backtracking Explorer"
+            className="hidden md:block w-full"
+          />
+          <img
+            src="/src/assets/GameIcon-mobile.svg"
+            alt="Ícone do Backtracking Explorer"
+            className="block md:hidden w-full"
+          />
+        </button>
+        <Button type={"song"} />
       </div>
 
-      <div className="w-full flex justify-center absolute bottom-4 left-0">
-        <p className="inline-block text-[#E8E8E8]">
-          Desenvolvido por{" "}
-          <a
-            href="https://github.com/edd-araujo"
-            className="text-[#C88000] underline decoration-2"
-          >
-            Ed Araujo
-          </a>
-        </p>
+      <div className="flex flex-col gap-2 items-center justify-center p-4 ">
+        <div className="flex-1 max-w-4xl">
+          <MazeRenderer />
+        </div>
+
+        <div className="w-full lg:max-w-xl">
+          <ControlPanel />
+        </div>
       </div>
+      <footer className="w-full text-center my-4 mt-auto text-[#E8E8E8] text-sm lg:text-base">
+        Desenvolvido por{" "}
+        <a
+          href="https://github.com/edd-araujo"
+          target="_blank"
+          className="text-[#C88000] underline decoration-2 text-sm lg:text-base"
+        >
+          Ed Araujo
+        </a>
+      </footer>
     </div>
   );
 };
