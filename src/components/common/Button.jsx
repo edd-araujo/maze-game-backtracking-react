@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 
 const Button = ({
+  customText,
   type,
   onClick,
   isMute,
@@ -16,28 +17,36 @@ const Button = ({
   showFullPath,
   dropdownOpen,
   speedOption,
+  customStyle,
+  isRunning,
+  gameStatus,
 }) => {
   let buttonStyles = "";
   let buttonText = "";
 
   const renderSongIcon = () =>
-    isMute ? <FaVolumeMute size={24} /> : <FaVolumeUp size={24} />;
+    isMute ? (
+      <FaVolumeMute className="w-6 h-6 md:w-8 md:h-8 lg:w-6 lg:h-6" />
+    ) : (
+      <FaVolumeUp className="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10" />
+    );
   const renderPlayPauseIcon = () =>
-    isPlaying ? <FaPause size={20} /> : <FaPlay size={20} />;
+    isRunning ? <FaPause size={20} /> : <FaPlay size={20} />;
 
   if (type === "start") {
-    buttonText = "Iniciar";
     buttonStyles = "bg-[#C88000] w-full text-3xl rounded-lg";
-  } else if (type === "dropdown") {
-    buttonText = "Selecionar Mapa";
+  } else if (type === "mapSelector") {
     buttonStyles = `relative bg-[#004356] w-full text-2xl rounded-t-lg ${
       dropdownOpen ? "rounded-b-none" : "rounded-b-lg"
     }`;
   } else if (type === "song") {
-    buttonStyles = "absolute top-6 right-4 md:top-8 md:right-6 w-fit h-fit";
+    buttonStyles = `w-fit h-fit ${customStyle}`;
   } else if (type === "play/pause") {
-    buttonStyles =
-      "bg-[#004356] rounded-lg flex items-center justify-center hover:bg-[#C88000] active:bg-[#986200]";
+    buttonStyles = `bg-[#004356] rounded-lg flex items-center justify-center  ${
+      gameStatus === "completed"
+        ? "opacity-50 cursor-not-allowed"
+        : "hover:bg-[#C88000] active:bg-[#986200]"
+    } ${customStyle}`;
   } else if (type === "reset") {
     buttonStyles =
       "bg-[#004356] rounded-lg flex items-center justify-center hover:bg-[#C88000] active:bg-[#986200]";
@@ -59,13 +68,16 @@ const Button = ({
         type !== "song" ? "w-72 h-14" : ""
       } ${buttonStyles}`}
       onClick={onClick}
+      disabled={gameStatus === "completed"}
     >
+      {type === "start" && customText}
+      {type === "mapSelector" && customText}
       {type === "song" ? renderSongIcon() : buttonText}
       {type === "play/pause" && renderPlayPauseIcon()}
       {type === "reset" && <FaRedo size={20} />}
       {type === "speed" && `${speedOption}x`}
-      {type === "solutionPath" && "Exibir solução"}
-      {type === "fullPath" && "Exibir caminho percorrido"}
+      {type === "solutionPath" && customText}
+      {type === "fullPath" && customText}
     </button>
   );
 };
