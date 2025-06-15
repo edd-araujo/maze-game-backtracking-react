@@ -3,20 +3,23 @@ import HomePage from "./pages/HomePage";
 import CreditsPage from "./pages/CreditsPage";
 import GamePage from "./pages/GamePage";
 import { GameProvider } from "./context/GameContext";
+import { AudioProvider } from "./context/AudioContext";
 
 const App = () => {
   return (
-    <GameProvider>
-      <div className="bg-[#003645] h-screen overflow-hidden">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/credits" element={<CreditsPage />} />
-            <Route path="/game" element={<GamePage />} />
-          </Routes>
-        </BrowserRouter>
-      </div>
-    </GameProvider>
+    <AudioProvider>
+      <GameProvider>
+        <div className="bg-[#003645] h-screen overflow-hidden">
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/credits" element={<CreditsPage />} />
+              <Route path="/game" element={<GamePage />} />
+            </Routes>
+          </BrowserRouter>
+        </div>
+      </GameProvider>
+    </AudioProvider>
   );
 };
 

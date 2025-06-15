@@ -5,11 +5,15 @@ import MazeRenderer from "../components/game/MazeRenderer";
 import ControlPanel from "../components/game/ControlPanel";
 import Button from "../components/common/Button";
 import maps from "../data/maps";
+import { useAudio } from "../context/AudioContext";
 
 const GamePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isMuted, setIsMuted } = useAudio();
   const { state, dispatch } = useGame();
+
+  const toggleMute = () => setIsMuted((prev) => !prev);
 
   useEffect(() => {
     const mapId = location.state?.mapId || "gameMap1";
@@ -80,7 +84,7 @@ const GamePage = () => {
             className="block md:hidden w-full"
           />
         </button>
-        <Button type={"song"} />
+        <Button type={"song"} onClick={toggleMute} isMute={isMuted} />
       </div>
 
       <div className="flex flex-col gap-2 items-center justify-center p-4 ">

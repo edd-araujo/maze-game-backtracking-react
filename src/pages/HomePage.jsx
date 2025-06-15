@@ -4,17 +4,16 @@ import { useNavigate } from "react-router-dom";
 import Dropdown from "../components/common/Dropdown";
 import { useGame } from "../context/GameContext";
 import maps from "../data/maps";
+import { useAudio } from "../context/AudioContext";
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { isMuted, setIsMuted } = useAudio();
   const { dispatch } = useGame();
-  const [isMuted, setIsMuted] = useState(false);
   const [selectedMap, setSelectedMap] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
+  const toggleMute = () => setIsMuted((prev) => !prev);
 
   const startGame = () => {
     const mapId = selectedMap || "gameMap1";
@@ -32,7 +31,7 @@ const HomePage = () => {
     <div className="flex flex-col min-h-screen">
       <Button
         type={"song"}
-        onClick={() => toggleMute()}
+        onClick={toggleMute}
         isMute={isMuted}
         customStyle={"absolute top-6 right-4 p4 z-20"}
       />
