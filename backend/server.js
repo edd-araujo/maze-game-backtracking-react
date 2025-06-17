@@ -9,7 +9,65 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Maze validation function using BFS
+function isMazeValid(maze) {
+  const numRows = maze.length;
+  const numCols = maze[0].length;
+  let start = null;
+  const exits = [];
+
+  // Finds "S" and "E"
+  for (let r = 0; r < numRows; r++) {
+    for (let c = 0; c < numCols; c++) {
+      if (maze[r][c] === "S") start = { r, c };
+      if (maze[r][c] === "E") exits.push({ r, c });
+    }
+  }
+
+  if (!start || exits.length === 0) return false;
+
+  // BFS algorithm to find all cells accessible from "S"
+  const visited = Array.from({ length: numRows }, () =>
+    Array(numCols).fill(false)
+  );
+
+  const queue = [start];
+  visited[start.r][start.c] = true;
+
+  while (queue.length) {
+    const { r, c } = queue.shift();
+    for (const [dr, dc] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ]) {
+      const nr = r + dr,
+        nc = c + dc;
+      if (
+        nr >= 0 &&
+        nr < numRows &&
+        nc >= 0 &&
+        nc < numCols &&
+        !visited[nr][nc] &&
+        (maze[nr][nc] === "." || maze[nr][nc] === "E")
+      ) {
+        visited[nr][nc] = true;
+        queue.push({ r: nr, c: nc });
+      }
+    }
+  }
+
+  // Check if the Exit point is accessible from "S"
+  for (const { r, c } of exits) {
+    if (!visited[r][c]) return false;
+  }
+  return true;
+}
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 app.get("/", (req, res) => {
   res.send("Maze AI Backend is running!");
@@ -17,28 +75,31 @@ app.get("/", (req, res) => {
 
 // Main route for AI maze generation
 app.post("/generate-maze", async (req, res) => {
-  try {
-    const { rows, cols, exits } = req.body;
+  const MAX_ATTEMPTS = 3; // Try to generate a valid maze at least 3 times
+  let attempt = 0;
+  let lastError = null;
 
-    // Basic parameters validation
-    if (
-      !rows ||
-      !cols ||
-      !exits ||
-      rows < 5 ||
-      rows > 30 ||
-      cols < 5 ||
-      cols > 30 ||
-      exits < 1 ||
-      exits > 5
-    ) {
-      return res.status(400).json({
-        error:
-          "Invalid paremeters. Size must be between 5x5 and 30x30, exits between 1 and 5.",
-      });
-    }
+  while (attempt < MAX_ATTEMPTS) {
+    attempt++;
+    try {
+      const { rows, cols, exits } = req.body;
 
-    const prompt = `Gere um labirinto de ${rows}x${cols} como uma matriz de arrays em formato JSON, usando:
+      // Basic parameters validation
+      if (
+        !rows ||
+        !cols ||
+        !exits ||
+        rows < 5 ||
+        rows > 30 ||
+        cols < 5 ||
+        cols > 30 ||
+        exits < 1 ||
+        exits > 5
+      ) {
+        return res.status(400).json({ error: "Invalid parameters." });
+      }
+
+      const prompt = `Gere um labirinto de ${rows}x${cols} como uma matriz de arrays em formato JSON, usando:
 - "S" para o início (exatamente 1)
 - "E" para as saídas (exatamente ${exits})
 - "#" para paredes
@@ -50,8 +111,7 @@ REGRAS:
 - Todas as áreas acessíveis devem estar conectadas ao início
 - Todas as saídas devem ser acessíveis a partir do início
 - O labirinto deve ter pelo menos 8 becos sem saída
-- Não gere solução trivial (caminho direto)
-- Entre 50% e 70% do labirinto deve ser paredes
+- Não gere solução trivial
 
 Retorne APENAS o objeto JSON no formato:
 {
@@ -62,76 +122,58 @@ Retorne APENAS o objeto JSON no formato:
   ]
 }`;
 
-    console.log("Sending prompt to AI...");
+      console.log(`Attempt ${attempt} - Sending prompt to AI...`);
 
-    // Request to OpenAI
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 2000,
-      temperature: 0.8,
-    });
-
-    console.log("AI's response:", completion.choices[0].message.content);
-
-    let mazeResponse = completion.choices[0].message.content;
-
-    let cleanResponse = mazeResponse
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-
-    const parsedResponse = JSON.parse(cleanResponse);
-
-    let maze;
-    if (
-      parsedResponse &&
-      parsedResponse.maze &&
-      Array.isArray(parsedResponse.maze)
-    ) {
-      maze = parsedResponse.maze;
-    } else if (Array.isArray(parsedResponse)) {
-      maze = parsedResponse;
-    } else {
-      throw new Error("Invalid response format");
-    }
-
-    const hasStart = maze.flat().includes("S");
-    const exitCount = maze.flat().filter((cell) => cell === "E").length;
-
-    if (!hasStart) {
-      throw new Error("Maze does not contain Start point ('S')");
-    }
-
-    if (exitCount !== exits) {
-      throw new Error(
-        `Maze must have exactly ${exits} exits, but it has ${exitCount}`
-      );
-    }
-
-    res.json({
-      message: maze,
-      status: "Maze generated with success",
-    });
-  } catch (error) {
-    console.log("Error generating maze:", error);
-
-    if (error.message.includes("API key")) {
-      return res.status(500).json({
-        error: "API configuration error",
+      // Request to OpenAI
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 2000,
+        temperature: 0.8,
       });
-    }
 
-    if (error.name === "SyntaxError") {
-      return res.status(500).json({
-        error: "Error processing AI response",
-      });
-    }
+      let mazeResponse = completion.choices[0].message.content;
+      let cleanResponse = mazeResponse
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
 
-    res.status(500).json({
-      error: "Internal server error when generating maze",
-      details: error.message,
-    });
+      const parsed = JSON.parse(cleanResponse);
+      let maze;
+      if (parsed && parsed.maze && Array.isArray(parsed.maze)) {
+        maze = parsed.maze;
+      } else if (Array.isArray(parsed)) {
+        maze = parsed;
+      } else {
+        throw new Error("Invalid response format");
+      }
+
+      const hasS = maze.flat().includes("S");
+      const exitCount = maze.flat().filter((cell) => cell === "E").length;
+      if (!hasS || exitCount !== exits) {
+        throw new Error(
+          "The generated maze does not contain a Start or End point."
+        );
+      }
+
+      if (!isMazeValid(maze)) {
+        throw new Error(
+          "The generated maze does not connect the exit and the starting point."
+        );
+      }
+
+      return res.json({ maze });
+    } catch (error) {
+      lastError = error;
+      console.error(`Attempt ${attempt} failed:`, error.message);
+
+      if (attempt >= MAX_ATTEMPTS) {
+        return res.status(500).json({
+          error: "Unable to generate a valid maze after many attempts.",
+          details: lastError?.message || lastError,
+        });
+      }
+    }
   }
 });
 
