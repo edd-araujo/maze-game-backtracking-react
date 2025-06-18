@@ -146,6 +146,7 @@ const HomePage = () => {
         <a
           href="https://github.com/edd-araujo"
           className="text-[#C88000] underline decoration-2 text-sm lg:text-base"
+          target="_blank"
         >
           Ed Araujo
         </a>

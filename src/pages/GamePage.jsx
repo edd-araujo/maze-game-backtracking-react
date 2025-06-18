@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useGame } from "../context/GameContext";
 import MazeRenderer from "../components/game/MazeRenderer";
@@ -6,6 +6,7 @@ import ControlPanel from "../components/game/ControlPanel";
 import Button from "../components/common/Button";
 import maps from "../data/maps";
 import { useAudio } from "../context/AudioContext";
+import Tooltip from "../components/game/Tooltip";
 
 /**
  * Game Page Component
@@ -22,6 +23,12 @@ const GamePage = () => {
   const navigate = useNavigate();
   const { isMuted, setIsMuted } = useAudio();
   const { state, dispatch } = useGame();
+
+  const [showTooltip, setShowToolTip] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setShowToolTip(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleToggleMute = () => setIsMuted((prevMuteState) => !prevMuteState);
 
@@ -114,7 +121,7 @@ const GamePage = () => {
     <div className="flex flex-col min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between p-4">
-        <button onClick={handleNavigateBackToHome}>
+        <button onClick={handleNavigateBackToHome} className="relative">
           <img
             src="/GameIcon-desktop.png"
             alt="Ícone do Backtracking Explorer"
@@ -124,6 +131,11 @@ const GamePage = () => {
             src="/GameIcon-mobile.svg"
             alt="Ícone do Backtracking Explorer"
             className="block md:hidden w-full"
+          />
+          <Tooltip
+            message={"Clique aqui para voltar"}
+            show={showTooltip}
+            position="right"
           />
         </button>
         <Button type={"song"} onClick={handleToggleMute} isMute={isMuted} />
