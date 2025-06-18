@@ -6,7 +6,7 @@
  * AI responses, and validates maze content to ensure proper game functionality.
  */
 
-const BACKEND_URL_SERVER = "http://localhost:3001";
+const BACKEND_URL_SERVER = import.meta.env.VITE_API_URL || "";
 
 export class AIMazeGenerationService {
   /**
