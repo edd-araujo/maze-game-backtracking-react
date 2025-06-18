@@ -116,12 +116,12 @@ const GamePage = () => {
       <div className="flex items-center justify-between p-4">
         <button onClick={handleNavigateBackToHome}>
           <img
-            src="/src/assets/GameIcon-desktop.png"
+            src="/GameIcon-desktop.png"
             alt="Ícone do Backtracking Explorer"
             className="hidden md:block w-full"
           />
           <img
-            src="/src/assets/GameIcon-mobile.svg"
+            src="/GameIcon-mobile.svg"
             alt="Ícone do Backtracking Explorer"
             className="block md:hidden w-full"
           />

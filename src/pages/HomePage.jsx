@@ -105,12 +105,12 @@ const HomePage = () => {
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 lg:gap-12">
         <h1 className="lg:w-1/3 mb-8">
           <img
-            src="/src/assets/GameLogo-desktop.png"
+            src="/GameLogo-desktop.png"
             alt="Logo do Backtracking Explorer"
             className="hidden md:block w-full"
           />
           <img
-            src="/src/assets/GameLogo-mobile.png"
+            src="/GameLogo-mobile.png"
             alt="Logo do Backtracking Explorer"
             className="block md:hidden w-full"
           />
