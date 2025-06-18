@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const { OpenAI } = require("openai");
 require("dotenv").config();
 
@@ -258,6 +259,12 @@ Retorne APENAS o objeto JSON válido, SEM EXPLICAÇÕES, SEM MARKDOWN, SEM TEXTO
       // Otherwise, try again
     }
   }
+});
+
+expressApplication.use(express.static(path.join(__dirname, "../dist")));
+
+expressApplication.get("*", (request, response) => {
+  response.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
 expressApplication.listen(serverPort, () => {
