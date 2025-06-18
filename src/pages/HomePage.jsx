@@ -5,36 +5,103 @@ import Dropdown from "../components/common/Dropdown";
 import { useGame } from "../context/GameContext";
 import maps from "../data/maps";
 import { useAudio } from "../context/AudioContext";
+import { AIMazeGenerationService } from "../services/aiService";
+import AIMazeModal from "../components/modals/AIMazeModal";
+
+/**
+ * Home Page Component
+ *
+ * This component serves as the main entry point for the Backtracking Maze Explorer.
+ *
+ * It allows the user to select a maze, generate a maze using AI, toggle audio, and start the game.
+ * The component manages UI state for dropdowns and modals, and handles navigation to the game page.
+ */
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { isMuted, setIsMuted } = useAudio();
   const { dispatch } = useGame();
+
+  // Currently selected map
   const [selectedMap, setSelectedMap] = useState(null);
+
+  // State for dropdown and AI modal visibilty
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
-  const toggleMute = () => setIsMuted((prev) => !prev);
+  const handleToggleMute = () =>
+    setIsMuted((previousMuteState) => !previousMuteState);
 
-  const startGame = () => {
-    const mapId = selectedMap || "gameMap1";
+  /**
+   * Starts the game with the selected map.
+   * Navigates to the game page and dispatches the selected map to the context.
+   */
+  const handleStartGame = () => {
+    const mapIdToPlay = selectedMap || "gameMap1";
 
-    dispatch({ type: "SET_SELECTED_MAP", payload: mapId });
-    navigate("/game", { state: { mapId } });
+    dispatch({ type: "SET_SELECTED_MAP", payload: mapIdToPlay });
+    navigate("/game", { state: { mapId: mapIdToPlay } });
   };
 
-  const handleMapSelect = (mapKey) => {
+  // Handles the selection of a map from the dropdown.
+  const handleMapSelection = (mapKey) => {
     setSelectedMap(mapKey);
     setIsDropdownOpen(false);
   };
 
+  const handleGenerateAI = () => {
+    setIsDropdownOpen(false);
+    setIsAIModalOpen(true);
+  };
+
+  /**
+   * Handles the AI maze generation process.
+   * Requests a new maze from the AI service, adds it to the context, and selects it.
+   */
+  const handleAIMazeGeneration = async () => {
+    try {
+      const generatedMaze =
+        await AIMazeGenerationService.requestMazeGenerationFromAI();
+
+      const generatedMapId = `ai_generated_${Date.now()}`;
+
+      dispatch({
+        type: "ADD_GENERATED_MAP",
+        payload: { id: generatedMapId, map: generatedMaze },
+      });
+
+      setSelectedMap(generatedMapId);
+
+      console.log("Maze generated succesfully!");
+    } catch (error) {
+      console.error("Error generating maze:", error);
+      throw error; // Re-throw to be handled by modal
+    }
+  };
+
+  // Returns a custom name for the selected map
+  const getSelectedMapDisplayName = () => {
+    if (!selectedMap) return null;
+
+    if (selectedMap.startsWith("ai_generated_")) {
+      return "Mapa Gerado por IA";
+    }
+
+    const mapIndex = Object.keys(maps).indexOf(selectedMap);
+    return mapIndex >= 0 ? `Mapa ${mapIndex + 1}` : null;
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Audio toggle button */}
       <Button
         type={"song"}
-        onClick={toggleMute}
+        onClick={handleToggleMute}
         isMute={isMuted}
         customStyle={"absolute top-6 right-4 p4 z-20"}
       />
+
+      {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 lg:gap-12">
         <h1 className="lg:w-1/3 mb-8">
           <img
@@ -53,15 +120,11 @@ const HomePage = () => {
           <Button
             type={"start"}
             customText={"Iniciar"}
-            onClick={() => startGame()}
+            onClick={handleStartGame}
           />
           <div className="relative">
             <Button
-              customText={`${
-                selectedMap
-                  ? selectedMap.replace("gameMap", "Mapa ")
-                  : "Selecionar mapa"
-              }`}
+              customText={getSelectedMapDisplayName() || "Selecionar Mapa"}
               type={"mapSelector"}
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               dropdownOpen={isDropdownOpen}
@@ -69,13 +132,15 @@ const HomePage = () => {
             {isDropdownOpen && (
               <Dropdown
                 options={Object.keys(maps)}
-                onSelect={handleMapSelect}
+                onSelect={handleMapSelection}
+                onGenerateAI={handleGenerateAI}
               />
             )}
           </div>
         </div>
       </div>
 
+      {/* Footer */}
       <footer className="w-full text-center py-4 text-[#E8E8E8] text-sm lg:text-base">
         Desenvolvido por{" "}
         <a
@@ -85,6 +150,13 @@ const HomePage = () => {
           Ed Araujo
         </a>
       </footer>
+
+      {/* Modal for AI generation */}
+      <AIMazeModal
+        isOpen={isAIModalOpen}
+        onClose={() => setIsAIModalOpen(false)}
+        onGenerate={handleAIMazeGeneration}
+      />
     </div>
   );
 };

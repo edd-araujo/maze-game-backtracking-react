@@ -1,7 +1,18 @@
 import React, { createContext, useContext, useReducer } from "react";
 
+/**
+ * Game State Management Context
+ *
+ * This module provides centralized state management for the Backtracking Maze Explorer application.
+ *
+ *  It manages all game-related state including maze data,
+ * player position, algorithm execution status, visualization settings, and
+ * AI-generated mazes.
+ */
+
 const GameContext = createContext();
 
+// Initial application state with default values
 const initialState = {
   selectedMap: "gameMap1",
   currentMap: null,
@@ -16,16 +27,34 @@ const initialState = {
   showVisitedPath: false,
   speed: 500,
   isAlgorithmRunning: false,
+  generatedMaps: {},
 };
 
-const gameReducer = (state, action) => {
-  switch (action.type) {
+/**
+ * Handles all game state transitions and updates
+ *
+ * Processes different action types to update the game state appropriately.
+ * Each case handles a specific aspect of the game state, from maze initialization
+ * to algorithm execution control and visualization toggles.
+ */
+const gameStateReducer = (currentState, dispatchedAction) => {
+  switch (dispatchedAction.type) {
     case "SET_SELECTED_MAP":
-      return { ...state, selectedMap: action.payload };
-    case "INITIALIZE_GAME":
-      const { map, start, end } = action.payload;
+      return { ...currentState, selectedMap: dispatchedAction.payload };
+
+    case "ADD_GENERATED_MAP":
       return {
-        ...state,
+        ...currentState,
+        generatedMaps: {
+          ...currentState.generatedMaps,
+          [dispatchedAction.payload.id]: dispatchedAction.payload.map,
+        },
+      };
+
+    case "INITIALIZE_GAME":
+      const { map, start, end } = dispatchedAction.payload;
+      return {
+        ...currentState,
         currentMap: map,
         playerPosition: start,
         startPosition: start,
@@ -38,38 +67,50 @@ const gameReducer = (state, action) => {
         showVisitedPath: false,
         isAlgorithmRunning: false,
       };
+
     case "UPDATE_PLAYER_POSITION":
-      return { ...state, playerPosition: action.payload };
+      return { ...currentState, playerPosition: dispatchedAction.payload };
+
     case "ADD_VISITED_CELL":
-      const newVisited = new Set(state.visitedCells);
-      newVisited.add(`${action.payload.row}-${action.payload.col}`);
-      return { ...state, visitedCells: newVisited };
+      const newVisitedCell = new Set(currentState.visitedCells);
+      newVisitedCell.add(
+        `${dispatchedAction.payload.row}-${dispatchedAction.payload.col}`
+      );
+      return { ...currentState, visitedCells: newVisitedCell };
+
     case "UPDATE_CURRENT_PATH":
-      return { ...state, currentPath: action.payload };
+      return { ...currentState, currentPath: dispatchedAction.payload };
+
     case "SET_SOLUTION_PATH":
-      return { ...state, solutionPath: action.payload };
+      return { ...currentState, solutionPath: dispatchedAction.payload };
+
     case "SET_GAME_STATUS":
-      return { ...state, gameStatus: action.payload };
+      return { ...currentState, gameStatus: dispatchedAction.payload };
+
     case "SET_ALGORITHM_RUNNING":
-      return { ...state, isAlgorithmRunning: action.payload };
+      return { ...currentState, isAlgorithmRunning: dispatchedAction.payload };
+
     case "SET_SPEED":
-      return { ...state, speed: action.payload };
+      return { ...currentState, speed: dispatchedAction.payload };
+
     case "TOGGLE_SHOW_SOLUTION":
       return {
-        ...state,
-        showSolution: !state.showSolution,
+        ...currentState,
+        showSolution: !currentState.showSolution,
         showVisitedPath: false,
       };
+
     case "TOGGLE_SHOW_VISITED_PATH":
       return {
-        ...state,
-        showVisitedPath: !state.showVisitedPath,
+        ...currentState,
+        showVisitedPath: !currentState.showVisitedPath,
         showSolution: false,
       };
+
     case "RESET_GAME":
       return {
-        ...state,
-        playerPosition: state.playerPosition,
+        ...currentState,
+        playerPosition: currentState.startPosition,
         visitedCells: new Set(),
         solutionPath: [],
         currentPath: [],
@@ -80,24 +121,37 @@ const gameReducer = (state, action) => {
       };
 
     default:
-      return state;
+      return currentState;
   }
 };
 
+/**
+ * Provides game state context to child components
+ *
+ * Creates and manages the game state using useReducer, then provides
+ * both the current state and dispatch function to all child components
+ * through React Context API.
+ */
 export const GameProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(gameReducer, initialState);
+  const [gameState, dispatchGameAction] = useReducer(
+    gameStateReducer,
+    initialState
+  );
 
   return (
-    <GameContext.Provider value={{ state, dispatch }}>
+    <GameContext.Provider
+      value={{ state: gameState, dispatch: dispatchGameAction }}
+    >
       {children}
     </GameContext.Provider>
   );
 };
 
+// Custom hook for accessing game context
 export const useGame = () => {
-  const context = useContext(GameContext);
-  if (!context) {
+  const gameContextValue = useContext(GameContext);
+  if (!gameContextValue) {
     throw new Error("useGame must be used within a GameProvider");
   }
-  return context;
+  return gameContextValue;
 };

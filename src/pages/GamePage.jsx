@@ -7,59 +7,101 @@ import Button from "../components/common/Button";
 import maps from "../data/maps";
 import { useAudio } from "../context/AudioContext";
 
+/**
+ * Game Page Component
+ *
+ * This component is responsible for rendering the main gameplay interface,
+ * including the maze visualization, control panel, and audio controls.
+ *
+ * It initializes the game state based on the selected map and manages
+ * navigation and user interactions during gameplay.
+ */
+
 const GamePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isMuted, setIsMuted } = useAudio();
   const { state, dispatch } = useGame();
 
-  const toggleMute = () => setIsMuted((prev) => !prev);
+  const handleToggleMute = () => setIsMuted((prevMuteState) => !prevMuteState);
 
+  /**
+   * Initializes the game state based on the selected map.
+   *
+   * Loads the maze matrix, finds the start and end positions,
+   * and dispatches actions to set up the game for play.
+   *
+   * Redirects to home if the map is invalid.
+   */
   useEffect(() => {
-    const mapId = location.state?.mapId || "gameMap1";
-    const selectedMap = maps[mapId];
+    const selectedMapId = location.state?.mapId || "gameMap1";
+    let mazeMatrixToLoad;
 
-    if (!selectedMap) {
-      console.error("Map not found:", mapId);
+    if (selectedMapId.startsWith("ai_generated_")) {
+      mazeMatrixToLoad = state.generatedMaps[selectedMapId];
+    } else {
+      mazeMatrixToLoad = maps[selectedMapId];
+    }
+
+    if (!mazeMatrixToLoad) {
+      console.error("Map not found:", selectedMapId);
       navigate("/");
       return;
     }
 
     let startPos = null;
-    let endPos = null;
+    let endPositions = [];
 
-    for (let row = 0; row < selectedMap.length; row++) {
-      for (let col = 0; col < selectedMap[row].length; col++) {
-        if (selectedMap[row][col] === "S") {
-          startPos = { row, col };
-        } else if (selectedMap[row][col] === "E") {
-          endPos = { row, col };
+    for (let rowIndex = 0; rowIndex < mazeMatrixToLoad.length; rowIndex++) {
+      for (
+        let colIndex = 0;
+        colIndex < mazeMatrixToLoad[rowIndex].length;
+        colIndex++
+      ) {
+        if (mazeMatrixToLoad[rowIndex][colIndex] === "S") {
+          startPos = { row: rowIndex, col: colIndex };
+        } else if (mazeMatrixToLoad[rowIndex][colIndex] === "E") {
+          endPositions.push({ row: rowIndex, col: colIndex });
         }
       }
     }
 
-    if (!startPos || !endPos) {
+    if (!startPos || endPositions.length === 0) {
       console.error("Start or end position not found in map");
       navigate("/");
       return;
     }
 
+    const mazeEndPosition = endPositions[0];
+
     // Initialize game state
-    dispatch({ type: "SET_SELECTED_MAP", payload: mapId });
+    dispatch({ type: "SET_SELECTED_MAP", payload: selectedMapId });
     dispatch({
       type: "INITIALIZE_GAME",
       payload: {
-        map: selectedMap,
+        map: mazeMatrixToLoad,
         start: startPos,
-        end: endPos,
+        end: mazeEndPosition,
       },
     });
-  }, [location.state, dispatch, navigate]);
+  }, [location.state, dispatch, navigate, state.generatedMaps]);
 
-  const handleBackToHome = () => {
+  // Navigates the user back to the home page.
+  const handleNavigateBackToHome = () => {
     navigate("/");
   };
 
+  const getCurrentMapDisplayName = () => {
+    if (!state.selectedMap) return "Carregando...";
+
+    if (state.selectedMap.startsWith("ai_generated_")) {
+      return "Mapa Gerado por IA";
+    }
+
+    return state.selectedMap.replace("gameMap", "Mapa ");
+  };
+
+  // Show loading state if the maze is not yet loaded
   if (!state.currentMap) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -72,7 +114,7 @@ const GamePage = () => {
     <div className="flex flex-col min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between p-4">
-        <button onClick={handleBackToHome}>
+        <button onClick={handleNavigateBackToHome}>
           <img
             src="/src/assets/GameIcon-desktop.png"
             alt="Ícone do Backtracking Explorer"
@@ -84,9 +126,10 @@ const GamePage = () => {
             className="block md:hidden w-full"
           />
         </button>
-        <Button type={"song"} onClick={toggleMute} isMute={isMuted} />
+        <Button type={"song"} onClick={handleToggleMute} isMute={isMuted} />
       </div>
 
+      {/* Main content */}
       <div className="flex flex-col gap-2 items-center justify-center p-4 ">
         <div className="flex-1 max-w-4xl">
           <MazeRenderer />
@@ -96,6 +139,8 @@ const GamePage = () => {
           <ControlPanel />
         </div>
       </div>
+
+      {/* Footer */}
       <footer className="w-full text-center my-4 mt-auto text-[#E8E8E8] text-sm lg:text-base">
         Desenvolvido por{" "}
         <a

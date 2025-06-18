@@ -9,11 +9,12 @@ const App = () => {
   return (
     <AudioProvider>
       <GameProvider>
-        <div className="bg-[#003645] h-screen overflow-hidden">
+        <div className="bg-[#003645] h-full ">
           <BrowserRouter>
             <Routes>
+              {/* Home page route - main menu and maze selection */}
               <Route path="/" element={<HomePage />} />
-              <Route path="/credits" element={<CreditsPage />} />
+              {/* Game page route - maze gameplay and algorithm visualization */}
               <Route path="/game" element={<GamePage />} />
             </Routes>
           </BrowserRouter>
