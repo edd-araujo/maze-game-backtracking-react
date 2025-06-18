@@ -146,10 +146,6 @@ function validateStartAndExitPoints(mazeMatrix, expectedExitCount) {
   return hasStartPoint && actualExitCount === expectedExitCount;
 }
 
-expressApplication.get("/", (request, response) => {
-  response.send("Maze AI Backend is running!");
-});
-
 /**
  * Main route for maze generation using AI
  *
@@ -263,7 +259,7 @@ Retorne APENAS o objeto JSON válido, SEM EXPLICAÇÕES, SEM MARKDOWN, SEM TEXTO
 
 expressApplication.use(express.static(path.join(__dirname, "../dist")));
 
-expressApplication.get("*", (request, response) => {
+expressApplication.get(/^\/(?!api).*/, (request, response) => {
   response.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
